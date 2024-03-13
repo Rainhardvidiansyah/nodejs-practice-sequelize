@@ -1,10 +1,6 @@
-const bookController = require('./controller/bookcontroller')
-function log(some){
-    console.log(some)
-}
-// insertBookToDB.insertBook()
-// bookController.findAll()
+const { createCustomer, findCustomerById} = require ('./controller/customercontroller')
 
+// createCustomer("Reno", "reno", "email@reno", 1)
+//findCustomerById(4)
 
-bookController.findBookUsingWhereClause().then(a => console.log(a))
 

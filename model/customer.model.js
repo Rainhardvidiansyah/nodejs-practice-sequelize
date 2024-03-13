@@ -1,9 +1,10 @@
 const { DataTypes } = require('sequelize')
-const sequelize = require('../databaseconfig/sequelize.config')
-const queryInterface = sequelize.sequelize.getQueryInterface()
+const { sequelize } = require('../databaseconfig/sequelize.config')
+const queryInterface = sequelize.getQueryInterface()
+const bcrypt = require('bcrypt')
 //const queryInterface = sequelize.getQueryInterface()
 
-const customerTable = sequelize.sequelize
+const Customer = sequelize
 .define('customers', {
     id: {
         type: DataTypes.INTEGER,
@@ -16,7 +17,7 @@ const customerTable = sequelize.sequelize
     },
     password:{
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,  
     },
     email:{
         type: DataTypes.STRING,
@@ -28,30 +29,24 @@ const customerTable = sequelize.sequelize
     }
 })
 
-const modifyColum = queryInterface.changeColumn('customers', 'isActive', {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  });
+Customer.beforeSave(async (user, options) =>{
+    if(user.changed('password')){
+        const hashedPassword = await bcrypt.hash(user.password, 10)
+        user.password = hashedPassword;
+    }
+})
+
+
+// const modifyColum = queryInterface.changeColumn('customers', 'isActive', {
+//     type: DataTypes.BOOLEAN,
+//     allowNull: false
+//   });
 
 
 async function customerSync(){
-    const create = await customerTable.sync()
+    const create = await Customer.sync({alter:true})
     console.log("Customers table has been created successfully!")
 }
 
-module.exports = {customerSync, modifyColum}
-
-
-
-
-
-
-
-
-
-// // const Customers = sequelize.sequelize.define('customers',{
-
-// // })
-
-
-// //insert into customers (id, username, password, email) value(0, '', '', '')
+// module.exports = {customerSync, Customer}
+module.exports =  {Customer, customerSync}

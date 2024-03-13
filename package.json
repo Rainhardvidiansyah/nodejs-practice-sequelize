@@ -9,8 +9,12 @@
   "author": "rainhard",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "mysql2": "^3.9.2",
     "sequelize": "^6.37.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

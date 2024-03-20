@@ -1,9 +1,8 @@
 const {DataTypes} = require('sequelize')
 
-const sequelize = require('../databaseconfig/sequelize.config')
+const {sequelize} = require('../databaseconfig/sequelize.config')
 
-const Genre = sequelize.sequelize
-    .define('genre', {
+const Genre = sequelize.define('genre', {
     id:{
         type: DataTypes.INTEGER,
         primaryKey: true,

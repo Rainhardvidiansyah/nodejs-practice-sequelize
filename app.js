@@ -3,9 +3,17 @@ const app = express();
 const morgan = require('morgan');
 //----------------------------------------------------------------
 const customer = require('./routes/customer.route')
+const book = require('./routes/book.route')
 const login = require('./routes/login.route');
 const articleReviewRoute = require('./routes/articlereview.route');
 require('dotenv').config();
+
+//----------------------------------------------------------------
+const bc = require('./controller/bookcontroller')
+//title, description, price, academicTitle, firstName, lastName
+// bc.insertBook("Scam is dangerous", "Good Book", "20000.00", "", "Rainhard", "vidiansyah")
+// bc.findAllBook();
+// bc.findBookById(10)
 
 class Execute{
   constructor(){
@@ -20,6 +28,7 @@ class Execute{
     app.use('/api/v1/customer', customer)
     app.use('/api/v1/login', login)
     app.use('/api/v1/article_review', articleReviewRoute)
+    app.use('/api/v1/book', book)
 
     app.use('/', (req, res, next) => {
       res.status(404).json({

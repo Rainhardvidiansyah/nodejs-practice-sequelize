@@ -1,23 +1,24 @@
 const {DataTypes} = require('sequelize');
-const sequelize = require('../databaseconfig/sequelize.config');
+const {sequelize} = require('../databaseconfig/sequelize.config');
 
-const Aurhor = sequelize.defines('author', {
+const Author = sequelize.define('author', {
     academicTitle: {
-        type: DataTypes.string,
+        type: DataTypes.STRING,
         allowNull: true
     },
     firstName :{
-        data: DataTypes.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
     },
     lastName :{
-        data: DataTypes.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
     }
-})
+}, {sequelize, modelName: 'author'}
+)
 
 const authorSync = async () => {
-    await Aurhor.sync();
+    await Author.sync();
 }
 
-module.exports = authorSync
+module.exports = {Author, authorSync}

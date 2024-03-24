@@ -1,152 +1,134 @@
-const { Op, where } = require('sequelize')
+const { Op } = require('sequelize')
 const { Book } = require('../model/book.model')
+const {Author} = require('../model/author.model')
+
+//academicTitle, firstName, lastName
 
 
 function log(some){
     console.log(some)
 }
 
-async function insertBook(title, writer, publisher){
-try {
-    const book = await Book.create({
-        title: title,
-        writer: writer,
-        publisher: publisher
-    })
-    console.log("Book has succesfully been recorded into DB")
-    console.log(`Book id is: {book.id}`)
-    console.log(book)
-} catch (error) {
-    console.log(error)
-}}
+//title, description, price, 
+//FK author_id
+//how to author_id
 
-async function findAll(){
-    try {
-        const books = await Book.findAll()
-        console.log(books)
-        let result = Array.isArray(books);
-        console.log(`Is array ->> ${result}`)
-    } catch (error) {
-        console.log(error)
+class BookController{
+    constructor(){
     }
-}
 
-
-const findDataOrCreate = async (judul, writer) => {
-    const [bookData, created] = await Book.findOrCreate({
-        where:{
-            writer: {
-                [Op.like] : writer+'%'
-            }
-        ,title: {
-            [Op.like] : judul+'%'
-        }},
-        default:{
-            pusblisher: "Pustaka sohpia keren"
-        }
-    })
-    // .spread((item, create)=>{console.log(item.get)})
-    console.log(bookData)
-    console.log(created)
-}
-
-
-async function findBookUsingWhereClause() {
-  const books = await Book.findAll({
-    where:{
-        title:{
-            [Op.like] : 'judul%'
-        }
-        }})
-        // .then(title => console.log(title))
-        // .catch(err => console.log(err))
-        return books
-}
-    
-//find by writer using where clause
-const findByOneWriterUsingWhereClause = async (writer) =>{
-    try {
-        const writers = await Book.findOne({
-        where:{ writer:{
-                [Op.like]: writer+'%'}}
-        });
-    
-        if(writers == null){
-            log("Writers not found")
-        }else{
-            log("Writer's name is: " +writers.writer)
-        }
-    } catch (error) {
-        console.log(error)
-    }}
-
-//Find By Primary Key or Id
-const findByPk = async (id) => {
-    try {
-        const bookId = await Book.Book.findByPk(id)
-        if(bookId === null){
-            console.log("book doesn't exist!")
-        }else{
-            console.log(bookId)
-            console.log("Penulis: " + bookId.writer) // result: Penulis: Rainhard Vidiansyah
-        }
-    } catch (error) {
-        console.log(error)
-    }}
-
-//update data
-const updateData = async (newName) => {
-    try {
-        const writerOldName = await Book.Book.create({writer: "Rainhard Vidiansyah"});
-        writerOldName.writer = newName;
-        await writerOldName.save({fields: [writerOldName.writer]})
-        //{ fields: ['name'] }
-    } catch (error) {
-        console.log(error)
-    }}
-
-//UPDATE book SET book.name = '' where book.id =
-//Transform mysql clause into javascript function 
-async function updateWriterName(id, newWriterName){
-    try {
-        const updateWriterName = await Book.Book.update(
-            {writer:newWriterName},
-            {where:
-                {id: id}}
-        )
-        let updatedWriterName = updateWriterName.writer
-        //console.log(`Updated writer id: ${updateWriterName.id}`)
-        console.log(`updated writer name: ${updatedWriterName}`)
-    } catch (error) {
-        console.log(error)
-    }   
-}
-
-/**
- const jane = await User.create({ name: "Jane" });
-// the user is currently named "Jane" in the database
-jane.name = "Ada";
-// the name is still "Jane" in the database
-await jane.save();
- */
-
-//select * from books b where publisher = 'value';
-async function selectBookWherePublisher(publisherName){
-    try {
-        const publisher = await Book.findOne(
-            {where:{
-                publisher: {[Op.like]: publisherName + '%'}
-                }});
-        log(publisher) 
+    async insertBook(title, description, price, academicTitle, firstName, lastName){
+        try {
+            const author = await Author.findOne({
+                limit: 3,
+                where:{
+                    [Op.and]: [
+                        {firstName: {[Op.like]: '%' + firstName + '%' }},
+                        {lastName: {[Op.like]: '%' + lastName + '%' }}
+                    ]
+                }}) ?? await Author.create(
+                    {
+                        academicTitle: academicTitle,
+                        firstName: firstName,
+                        lastName: lastName
+                    })
+                const book = await Book.create({
+                    title: title,
+                    description: description,
+                    price: price,
+                    author_id: author.id
+                })
+                return book;
         } catch (error) {
-            console.error(error)
+            console.error(error.message);
+        }}
+       
+        
+        async findAllBook(){
+            try {
+                const books = await Book.findAll({
+                    attributes: {exclude: ["author_id"]},
+                    include: [{
+                        model: Author,
+                        attributes: ["id", "firstName", "lastName"]
+                    }]
+                    })
+                console.log("Get all books is complete")
+                return books;
+            } catch (error) {
+                console.log(error)
+            }
         }
-}
+        
+        async findBookUsingWhereClause() {
+          const books = await Book.findAll({
+            where:{
+                title:{
+                    [Op.like] : 'judul%'
+                }
+                }})
+                // .then(title => console.log(title))
+                // .catch(err => console.log(err))
+                return books
+        }
+        
+        //Find By Primary Key or Id
+        async findBookById(id) {
+            try {
+                const bookId = await Book.findByPk(id, {
+                    attributes: {exclude: ["author_id"]},
+                    include: [{
+                        model: Author,
+                        attributes: ["id","firstName", "lastName"]
+                    }],
+                })
+                    
+                if(bookId == null){
+                    console.log("book doesn't exist!")
+                }
+                // const {author_id, ...rest} = bookId
+                // console.log(rest)
+                // return rest;
+                //console.log("Book id exists!");
+                //return bookId;
+                return bookId;
+                
+            } catch (error) {
+                console.log(error)
+            }}
+        
+        //update data
+        async updateData (newName) {
+           }
+        
+        //UPDATE book SET book.name = '' where book.id =
+        //Transform mysql clause into javascript function 
+        async updateWriterName(id, newWriterName){
+            try {
+                const updateWriterName = await Book.update(
+                    {writer:newWriterName},
+                    {where:
+                        {id: id}}
+                )
+                let updatedWriterName = updateWriterName.writer
+                console.log(`updated writer name: ${updatedWriterName}`)
+            } catch (error) {
+                console.log(error)
+            }}
 
-module.exports = {insertBook,
-    findAll, findBookUsingWhereClause, 
-    findByOneWriterUsingWhereClause, findByPk,
-    updateData, updateWriterName, 
-    // getDataByUsingFindOneAndPrintTheItem,
-    findDataOrCreate, selectBookWherePublisher
-}
+        async selectBookWherePublisher(publisherName){
+            try {
+                const publisher = await Book.findOne(
+                    {where:{
+                        publisher: {[Op.like]: publisherName + '%'}
+                        }});
+                log(publisher) 
+                } catch (error) {
+                    console.error(error)
+                }}
+    }
+
+
+
+
+module.exports = new BookController()

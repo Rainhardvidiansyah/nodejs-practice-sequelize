@@ -1,4 +1,4 @@
-const { Op } = require('sequelize')
+const { Op, Error } = require('sequelize')
 const { Book } = require('../model/book.model')
 const {Author} = require('../model/author.model')
 
@@ -82,24 +82,25 @@ class BookController{
                         attributes: ["id","firstName", "lastName"]
                     }],
                 })
-                    
                 if(bookId == null){
                     console.log("book doesn't exist!")
                 }
-                // const {author_id, ...rest} = bookId
-                // console.log(rest)
-                // return rest;
-                //console.log("Book id exists!");
-                //return bookId;
                 return bookId;
-                
             } catch (error) {
                 console.log(error)
             }}
         
         //update data
-        async updateData (newName) {
-           }
+        async updateBook (id, title, description, price) {
+            try {
+                const book = await Book.update(
+                    {title, description, price},
+                    {where: {id}}
+                )
+                return book;
+            } catch (error) {
+                console.error(error);    
+            }}
         
         //UPDATE book SET book.name = '' where book.id =
         //Transform mysql clause into javascript function 
